@@ -149,6 +149,11 @@ Explanation:
 
 ### Task 2: Create a `CMakeLists.txt`
 
+> ⚠️ **Attention:**  
+> Don't worry if the `CMakeLists.txt` script looks confusing — CMake is a complete language of its own.  
+> This build configuration will work just fine for this and future examples, even if you don't understand every detail right now.  
+> If you're curious or want to dive deeper later, check out the dedicated [CMake exercises](#), but it's not necessary at this stage.
+
 Add the following `CMakeLists.txt` to your project root:
 
 ```cmake
