@@ -202,10 +202,10 @@ cs_copy_plugins(CsGui)
 From your project root, run the following command:
 
 ```sh
-cmake -B ./build -DCMAKE_PREFIX_PATH=$CS2_LIB_PREFIX
+cmake -B ./build -DCMAKE_PREFIX_PATH=$CS_LIB_PREFIX
 ```
 
-Ensure that the environment variable `CS2_LIB_PREFIX` is correctly set. If you don't know what that means, revisit the Kitchensink demo setup steps.
+Ensure that the environment variable `CS_LIB_PREFIX` is correctly set. If you don't know what that means, revisit the Kitchensink demo setup steps.
 
 ### Task 3: Build and run the application
 
