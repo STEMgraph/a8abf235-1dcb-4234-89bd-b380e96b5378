@@ -1,51 +1,223 @@
 <!---
 {
-  "depends_on": [],
+  "id": "a8abf235-1dcb-4234-89bd-b380e96b5378",
+  "depends_on": ["abe720ad-32b4-4303-9b61-5875f592c05c"],
   "author": "Stephan Bökelmann",
-  "first_used": "2025-03-17",
-  "keywords": ["learning", "exercises", "education", "practice"]
+  "first_used": "2025-05-20",
+  "keywords": ["CopperSpice", "GUI", "C++"]
 }
 --->
 
-# Learning Through Exercises
+# A minimal CopperSpice Example
 
 ## Introduction
-Learning by doing is one of the most effective methods to acquire new knowledge and skills. Rather than passively consuming information, actively engaging in problem-solving fosters deeper understanding and long-term retention. By working through structured exercises, students can grasp complex concepts in a more intuitive and applicable way. This approach is particularly beneficial in technical fields like programming, mathematics, and engineering.
+> Before you proceed with this tutorial, make sure, that the [CopperSpice Kitchensink Demo](https://github.com/STEMgraph/abe720ad-32b4-4303-9b61-5875f592c05c) was built correctly on your machine!
+
+After setting up the demo, we are now doing the exact opposite: Setting up a minimal working example. 
+Whenever it is time to work with a new library, language or framework, make sure to first build an already existing demo project; and second build your own minimal example. 
+
+The heart of CopperSpice is the so called Event-System. 
+It is the interface between the click- and keyboard-events.
+On Linux Systems, the X11 library can be used to abstract this. 
+
+Imagine your process running, doing what it can do until it runs out of jobs. 
+It is now every GUIs time to wait for a next `click`, `button` or `timerout` event.
+On the lowest basis of our process, a specific combination of instructions is used, to indicate to the kernel, that we would like to sleep until any of these events happen. 
+
+In a very trivial way, this could look something like this:
+```asm
+.section .data
+timeout:
+    .quad 5         # seconds (tv_sec field of struct timeval)
+    .quad 0         # microseconds (tv_usec field of struct timeval)
+
+.section .text
+.global _start
+_start:
+    # ----------------------------------------------------------
+    # rdi = nfds (highest file descriptor + 1)
+    # Since we are not watching any file descriptors,
+    # we set nfds = 0 — the kernel will ignore read/write/except sets.
+    # ----------------------------------------------------------
+    mov $0, %rdi         # nfds = 0 (no file descriptors to monitor)
+
+    # ----------------------------------------------------------
+    # rsi = readfds
+    # Set to NULL (0) since we're not watching for readability.
+    # Normally, you'd pass a pointer to an fd_set structure.
+    # ----------------------------------------------------------
+    mov $0, %rsi         # readfds = NULL
+
+    # ----------------------------------------------------------
+    # rdx = writefds
+    # Set to NULL (0) since we're not watching for writability.
+    # ----------------------------------------------------------
+    mov $0, %rdx         # writefds = NULL
+
+    # ----------------------------------------------------------
+    # r10 = exceptfds
+    # Set to NULL (0) since we're not watching for exceptional conditions.
+    # ----------------------------------------------------------
+    mov $0, %r10         # exceptfds = NULL
+
+    # ----------------------------------------------------------
+    # r8 = timeout
+    # Load the address of our timeout struct into r8.
+    # This tells select() how long to wait.
+    # lea (Load Effective Address) calculates the address of `timeout`
+    # relative to the instruction pointer (RIP).
+    # ----------------------------------------------------------
+    lea timeout(%rip), %r8  # timeout = &timeout (5s)
+
+    # ----------------------------------------------------------
+    # rax = syscall number
+    # The syscall number for select() is 23 on x86-64 Linux.
+    # This makes the syscall with all arguments set up above.
+    # ----------------------------------------------------------
+    mov $23, %rax        # syscall number for select()
+    syscall              # invoke the kernel
+
+    # ----------------------------------------------------------
+    # Once the select() syscall returns (after timeout),
+    # we'll just exit the process cleanly with exit(0).
+    # ----------------------------------------------------------
+    mov $60, %rax        # syscall number for exit()
+    xor %rdi, %rdi       # exit code = 0
+    syscall              # exit(0)
+```
+If you are confused by the syntax, go back to the [basic GAS exercises](https://github.com/orgs/STEMgraph/repositories?q=GAS)
+
+Once we know which events we want to listen to, we can decide which function to run. 
+This process builds on the `sends + blocks` idea that was first employed in the **smalltalk** language in the 1970s. 
+The **Qt**-Framework (pronounced: "cute") refactored this idea to a mechanic called `signals & slots`. 
+Where signals are events, emitted by an object and slots are triggers of methods of other objects. 
+CopperSpice, since being a fork of Qt, uses the same concept.
+Which means we need to tell the CopperSpice Event-System which signal shall call which method. 
+This is done by `connect`ing them:
+```cpp
+connect(sender, &SenderClass::signalName,
+        receiver, &ReceiverClass::slotName);
+```
+
+In this exercise we will connect the `::clicked`-signal of a push-button with the `::close` slot of the applications main-window object. 
 
 ### Further Readings and Other Sources
-- [The Importance of Practice in Learning](https://www.sciencedirect.com/science/article/pii/S036013151300062X)
-- "The Art of Learning" by Josh Waitzkin
-- [How to Learn Effectively: 5 Key Strategies](https://www.edutopia.org/article/5-research-backed-learning-strategies)
+- [Video-Tutorial to this Exercise](https://youtu.be/OhyylLAHQHc?si=rKLNYyRgMCm_KtVj&utm_source=STEMgraph)
+- [The CopperSpice Event System](https://www.copperspice.com/docs/cs_api/event-system-c.html)
 
 ## Tasks
-1. **Write a Summary**: Summarize the concept of "learning by doing" in 3-5 sentences.
-2. **Example Identification**: List three examples from your own experience where learning through exercises helped you understand a topic better.
-3. **Create an Exercise**: Design a simple exercise for a topic of your choice that someone else could use to practice.
-4. **Follow an Exercise**: Find an online tutorial that includes exercises and complete at least two of them.
-5. **Modify an Existing Exercise**: Take a basic problem from a textbook or online course and modify it to make it slightly more challenging.
-6. **Pair Learning**: Explain a concept to a partner and guide them through an exercise without giving direct answers.
-7. **Review Mistakes**: Look at an exercise you've previously completed incorrectly. Identify why the mistake happened and how to prevent it in the future.
-8. **Time Challenge**: Set a timer for 10 minutes and try to solve as many simple exercises as possible on a given topic.
-9. **Self-Assessment**: Create a checklist to evaluate your own performance in completing exercises effectively.
-10. **Reflect on Progress**: Write a short paragraph on how this structured approach to exercises has influenced your learning.
 
-<details>
-  <summary>Tip for Task 5</summary>
-  Try making small adjustments first, such as increasing the difficulty slightly or adding an extra constraint.
-</details>
+### Task 1: Create a minimal GUI project
+
+Create a new folder and inside it a subfolder `./src`. Add the following `main.cpp`:
+
+```cpp
+#include <QtCore>
+#include <QtGui>
+
+int main(int argc, char *argv[])
+{
+   QApplication app(argc, argv);
+
+   QWidget *mainWindow = new QWidget();
+   mainWindow->setMinimumSize(700, 350);
+
+   QPushButton *pb = new QPushButton();
+   pb->setText("Close");
+
+   QHBoxLayout *layout = new QHBoxLayout(mainWindow);
+   layout->addWidget(pb);
+
+   QObject::connect(pb, &QPushButton::clicked,
+         mainWindow, &QWidget::close);
+
+   mainWindow->show();
+
+   return app.exec();
+}
+```
+
+Explanation:
+
+* Includes `QtCore` and `QtGui`, the essential CopperSpice headers.
+* Initializes the QApplication which handles GUI control.
+* Creates a QWidget as the main window and sets its minimum size.
+* Adds a QPushButton labeled "Close".
+* Uses a horizontal layout to manage the button.
+* Connects the button's click signal to the close slot of the window.
+* Displays the window and enters the application loop.
+
+### Task 2: Create a `CMakeLists.txt`
+
+Add the following `CMakeLists.txt` to your project root:
+
+```cmake
+cmake_minimum_required(VERSION 3.16)
+project(PushButton)
+
+include(CheckCXXCompilerFlag)
+include(CheckCXXSourceCompiles)
+include(CheckIncludeFile)
+include(CheckIncludeFiles)
+
+find_package(CopperSpice REQUIRED)
+
+if(CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD)")
+  include(GNUInstallDirs)
+  set(CMAKE_INSTALL_RPATH "\$ORIGIN")
+elseif()
+  message(FATAL_ERROR "Unsupported Operating System. Please use Linux or a compatible Unix variant.")
+endif()
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_INCLUDE_DIRECTORIES_BEFORE ON)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+list(APPEND PROJECT_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+)
+
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
+
+target_link_libraries(${PROJECT_NAME}
+  PRIVATE
+  CopperSpice::CsCore
+  CopperSpice::CsGui
+)
+
+install(TARGETS ${PROJECT_NAME} DESTINATION .)
+cs_copy_library(CsCore)
+cs_copy_library(CsGui)
+cs_copy_plugins(CsGui)
+```
+
+From your project root, run the following command:
+
+```sh
+cmake -B ./build -DCMAKE_PREFIX_PATH=$CS2_LIB_PREFIX
+```
+
+Ensure that the environment variable `CS2_LIB_PREFIX` is correctly set. If you don't know what that means, revisit the Kitchensink demo setup steps.
+
+### Task 3: Build and run the application
+
+```sh
+cmake --build ./build
+cmake --install ./build --prefix ./deploy
+./build/PushButton
+```
 
 ## Questions
-1. What are the main benefits of learning through exercises compared to passive learning?
-2. How do exercises improve long-term retention?
-3. Can you think of a subject where learning through exercises might be less effective? Why?
-4. What role does feedback play in learning through exercises?
-5. How can self-designed exercises improve understanding?
-6. Why is it beneficial to review past mistakes in exercises?
-7. How does explaining a concept to someone else reinforce your own understanding?
-8. What strategies can you use to stay motivated when practicing with exercises?
-9. How can timed challenges contribute to learning efficiency?
-10. How do exercises help bridge the gap between theory and practical application?
+
+1. What role does the `QApplication` object play in a CopperSpice application?
+2. How does the signal-slot mechanism work behind the scenes?
+3. Why do we need to explicitly link `CsCore` and `CsGui`?
+4. What would happen if you connect a signal to a slot that does not exist?
+5. How can you verify whether a `connect()` call succeeded?
 
 ## Advice
-Practice consistently and seek out diverse exercises that challenge different aspects of a topic. Combine exercises with reflection and feedback to maximize your learning efficiency. Don't hesitate to adapt exercises to fit your own needs and ensure that you're actively engaging with the material, rather than just going through the motions.
 
+You are now entering the realm of reactive, event-driven programming in C++. It's crucial to master these minimal examples before progressing to larger and more complex GUI systems. Take the time to fully understand each command, compile step, and signal-slot binding. If something breaks, break it down even further. Stick with `vim` and build automation with CMake for deeper insight into your toolchain. For additional practice, refer to [this signals and slots exercise](#). If you're struggling to understand the CMake flow or the environment variables, revisit the Kitchensink project setup — understanding your build system is half the battle.
