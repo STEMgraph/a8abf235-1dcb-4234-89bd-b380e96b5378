@@ -1,6 +1,7 @@
 <!---
 {
   "id": "a8abf235-1dcb-4234-89bd-b380e96b5378",
+  "teaches": "A minimal CopperSpice Example",
   "depends_on": ["abe720ad-32b4-4303-9b61-5875f592c05c"],
   "author": "Stephan Bökelmann",
   "first_used": "2025-05-20",
